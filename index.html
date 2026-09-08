@@ -112,8 +112,11 @@
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .field{margin-bottom:12px}
   label{font-size:12px;color:var(--n-600);display:block;margin-bottom:3px;font-weight:600;letter-spacing:.015em}
-  .inp,.sel,.ta{font-size:13px;padding:9px 12px;border-radius:10px;background:var(--n-50);color:var(--text);box-shadow:inset 0 0 0 1px var(--hairline);min-height:38px;display:flex;align-items:center;gap:6px}
-  .sel::after{content:"⌄";margin-left:auto;color:var(--n-600);font-size:14px;line-height:1}
+  /* .sel は「セレクトボックスの見た目」。表の選択行も class="sel" を使うため、
+     tr を外さないと display:flex が行に当たり、表組みが崩れて列が縦書きになる。
+     行の強調は下の .tbl tr.sel td が持っている。 */
+  .inp,.sel:not(tr),.ta{font-size:13px;padding:9px 12px;border-radius:10px;background:var(--n-50);color:var(--text);box-shadow:inset 0 0 0 1px var(--hairline);min-height:38px;display:flex;align-items:center;gap:6px}
+  .sel:not(tr)::after{content:"⌄";margin-left:auto;color:var(--n-600);font-size:14px;line-height:1}
   .ta{align-items:flex-start;white-space:pre-wrap;line-height:1.6}
   .ph{color:var(--n-400)}
   .btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:9px 17px;font-size:13px;font-weight:700;letter-spacing:.02em;line-height:1.45;background:linear-gradient(180deg,#1FA98D 0%,#159178 100%);color:#fff;box-shadow:0 2px 5px -2px rgba(21,145,120,.35),inset 0 1px 0 rgba(255,255,255,.2);position:relative;white-space:nowrap;border:1px solid transparent;transition:transform .2s}
@@ -124,11 +127,22 @@
   .btn.click{transform:scale(.97)}
   .btn.click::after{content:"";position:absolute;inset:-6px;border-radius:14px;border:2px solid var(--co-500);animation:ring .6s var(--ease) forwards}
   @keyframes ring{from{opacity:1;transform:scale(.92)}to{opacity:0;transform:scale(1.12)}}
-  .tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+  /* このファイルには DOCTYPE が無く、ブラウザは quirks モードで描画する。
+     quirks では <table> が祖先の color / font-family を継承しないため、表の文字だけが
+     body（＝プレイヤーの暗色）の色 #D7E3DF になり、白いパネルの上でほぼ読めなかった。
+     DOCTYPE を足すと寸法の詰め方が全部変わるので、表側で明示的に受け直す。 */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;color:var(--text);font-family:inherit}
   .tbl th,.tbl td{border-bottom:1px solid var(--hairline-soft);padding:11px 13px;text-align:left;vertical-align:top}
   .tbl th{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--n-400);background:rgba(251,252,252,.88);box-shadow:inset 0 -1px 0 var(--hairline)}
   .tbl tr.sel td{background:var(--em-100);box-shadow:inset 3px 0 0 var(--em-500)}
   .tbl .r{text-align:right}
+  /* 実画面(app/globals.css)の .tbl-scroll と同じ。対象は数百〜数千社あるので、
+     表だけを枠内で切って右のパネルを押し出さない。見出しは sticky で残る。 */
+  .tbl-scroll{max-height:420px;overflow:hidden;border:1px solid var(--n-200);border-radius:8px}
+  .tbl-scroll .tbl th{box-shadow:inset 0 -1px 0 var(--n-200)}
+  /* 行の登場演出は透明度だけにする。tr に transform が載ると、overflow を持つ
+     この枠の中では行が包含ブロックになり、表のレイアウトが崩れて縦書きになる。 */
+  .tbl-scroll tr.cue{transform:none}
   .tbl a{color:var(--em-700);text-decoration:none}
   .pill{display:inline-block;padding:3px 12px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
   .pill.pending{background:#FEF4E8;color:var(--warn)}.pill.in_progress{background:var(--em-50);color:var(--em-700)}.pill.done{background:var(--em-100);color:var(--em-800)}.pill.skip{background:var(--n-100);color:var(--n-600)}.pill.error{background:#FDECEC;color:var(--danger)}.pill.am{background:var(--co-50);color:var(--co-700)}.pill.pm{background:var(--em-50);color:var(--em-700)}
@@ -512,21 +526,23 @@
             </section>
 
             <!-- ===== 2. リスト取込 /list-import ===== -->
-            <section class="scene" data-start="46" data-end="62" data-nav="/list-import" data-step="1" data-scroll="0:0,6:0,9:520,12:1040">
+            <section class="scene" data-start="46" data-end="62" data-nav="/list-import" data-step="1" data-scroll="0:0,6:0,9:520,12:980">
               <div class="page"><div class="container">
                 <div class="page-head"><h1>リスト取込</h1><div class="meta">CSV/TSV貼付 → 自動プレビュー → 投入（列マッピング・重複処理は詳細設定）</div>
                   <div class="flow-strip"><span class="flow-pos">営業工程 <b>2</b><span class="flow-tot"> / 8</span></span><span class="flow-links"><span class="flow-link">← 前: リスト作成</span><span class="flow-link next">次: メール送信 →</span></span></div></div>
                 <div class="panel" data-fx="0.6:5.5:CSVを貼るだけ"><h2><span class="panel-step">1</span>データ取込</h2>
                   <div style="border:2px dashed var(--n-300);border-radius:12px;padding:18px;text-align:center;background:var(--n-25)"><div style="font-size:22px">📄</div><div style="font-weight:700">CSV / TSV をここにドラッグ＆ドロップ</div><div class="small muted">クリックでフォルダからファイルを選べます。複数ファイル・フォルダごとのドロップにも対応（画面のどこに落としてもOK / 1行目=ヘッダ）</div><div class="row" style="justify-content:center;margin-top:8px"><span class="btn secondary sm">📂 ファイルを選択</span><span class="btn secondary sm">🗂 フォルダを選択</span></div></div>
-                  <div class="field" style="margin-top:12px"><label>または、CSV / TSV を直接貼り付け（1行目=ヘッダ）</label><div class="ta mono" style="min-height:96px"><span class="type" data-type="会社名,URL,業種,採用対象,担当者氏名,担当者電話&#10;サンプル商事株式会社,https://sample-shoji.example.jp,製造,機械オペレーター,佐藤 一郎,03-1111-2222&#10;テック株式会社,https://tech.example.jp,IT,エンジニア,鈴木 花子,03-3333-4444&#10;サンプル製造株式会社,https://s-mfg.example.jp,製造,検査員,田中 太郎,03-5555-6666" data-in="1.2" data-dur="3.6"></span></div></div>
-                  <div class="row"><span class="btn secondary sm" data-click="0.8">サンプルを入れて試す</span><span class="btn secondary sm">下書きを破棄</span><span class="small muted">ファイルを入れるか貼り付けると自動でプレビューします。各列の対応先は自動推定されます。</span></div>
+                  <div class="field" style="margin-top:12px"><label>または、CSV / TSV を直接貼り付け（1行目=ヘッダ）</label><div class="ta mono" style="min-height:96px"><span class="type" data-type="企業名,HP,業種,職種,担当者,TEL&#10;やまなみ農業協同組合,https://www.ja-yamanami.example.jp,農業協同組合（JA金融機関含む）/共済,一般事務・技術職・専門職,川浦,0267-24-3318&#10;社会福祉法人 みどり川福祉会,https://www.midorikawa-fukushikai.example.jp,福祉サービス/医療機関,介護スタッフ,西沢,0258-46-7124&#10;鶴見台運輸株式会社,https://www.tsurumidai-unyu.example.jp,物流・倉庫/陸運（貨物・バス・タクシー）,,五十住,045-511-8072&#10;五葉信用組合,https://www.goyo-shinkumi.example.jp,信用金庫・労働金庫・信用組合,新卒（大学・院）,吉岡,0178-43-6205&#10;北信越設備工業株式会社,https://www.hokushinetsu-setsubi.example.jp,建設・設備/設備工事・設備設計,,小林,076-233-4180" data-in="1.2" data-dur="4.4"></span></div></div>
+                  <div class="row"><span class="btn secondary sm">サンプルを入れて試す</span><span class="btn secondary sm">下書きを破棄</span><span class="small muted">ファイルを入れるか貼り付けると自動でプレビューします。各列の対応先は自動推定されます。</span></div>
                 </div>
                 <div class="panel cue in" data-in="5.2" data-dis="5.2" data-fx="5.5:11:列の対応先は自動で推定"><h2><span class="panel-step">2</span>プレビュー</h2>
-                  <div class="row" style="margin-bottom:10px"><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">,</b><span class="small muted">区切り</span></span><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">6</b><span class="small muted">列数</span></span><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">3</b><span class="small muted">行数</span></span><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">100%</b><span class="small muted">取込先が決まった列</span></span></div>
-                  <table class="tbl"><thead><tr><th>会社名<div class="small muted" style="letter-spacing:0">→ 会社名</div></th><th>URL<div class="small muted" style="letter-spacing:0">→ URL</div></th><th>業種<div class="small muted" style="letter-spacing:0">→ 業種</div></th><th>採用対象<div class="small muted" style="letter-spacing:0">→ 採用対象</div></th><th>担当者氏名<div class="small muted" style="letter-spacing:0">→ 担当者氏名</div></th><th>担当者電話<div class="small muted" style="letter-spacing:0">→ 担当者電話</div></th></tr></thead><tbody>
-                    <tr><td>サンプル商事株式会社</td><td class="mono">https://sample-shoji.example.jp</td><td>製造</td><td>機械オペレーター</td><td>佐藤 一郎</td><td class="mono">03-1111-2222</td></tr>
-                    <tr><td>テック株式会社</td><td class="mono">https://tech.example.jp</td><td>IT</td><td>エンジニア</td><td>鈴木 花子</td><td class="mono">03-3333-4444</td></tr>
-                    <tr><td>サンプル製造株式会社</td><td class="mono">https://s-mfg.example.jp</td><td>製造</td><td>検査員</td><td>田中 太郎</td><td class="mono">03-5555-6666</td></tr>
+                  <div class="row" style="margin-bottom:10px"><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">,</b><span class="small muted">区切り</span></span><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">6</b><span class="small muted">列数</span></span><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">378</b><span class="small muted">行数</span></span><span class="iss-card" style="padding:6px 10px;border-left:none;display:inline-block"><b style="display:block;font-size:16px">100%</b><span class="small muted">取込先が決まった列</span></span></div>
+                  <table class="tbl"><thead><tr><th>企業名<div class="small muted" style="letter-spacing:0">→ 会社名</div></th><th>HP<div class="small muted" style="letter-spacing:0">→ URL</div></th><th>業種<div class="small muted" style="letter-spacing:0">→ 業種</div></th><th>職種<div class="small muted" style="letter-spacing:0">→ 採用対象</div></th><th>担当者<div class="small muted" style="letter-spacing:0">→ 担当者氏名</div></th><th>TEL<div class="small muted" style="letter-spacing:0">→ 担当者電話</div></th></tr></thead><tbody>
+                    <tr><td>やまなみ農業協同組合</td><td class="small muted">https://www.ja-yamanami.example.jp</td><td class="small muted">農業協同組合（JA金融機関含む）/共済</td><td>一般事務・技術職・専門職</td><td>川浦</td><td>0267-24-3318</td></tr>
+                    <tr><td>社会福祉法人 みどり川福祉会</td><td class="small muted">https://www.midorikawa-fukushikai.example.jp</td><td class="small muted">福祉サービス/医療機関</td><td>介護スタッフ</td><td>西沢</td><td>0258-46-7124</td></tr>
+                    <tr><td>鶴見台運輸株式会社</td><td class="small muted">https://www.tsurumidai-unyu.example.jp</td><td class="small muted">物流・倉庫/陸運（貨物・バス・タクシー）</td><td><span class="muted">—</span></td><td>五十住</td><td>045-511-8072</td></tr>
+                    <tr><td>五葉信用組合</td><td class="small muted">https://www.goyo-shinkumi.example.jp</td><td class="small muted">信用金庫・労働金庫・信用組合</td><td>新卒（大学・院）</td><td>吉岡</td><td>0178-43-6205</td></tr>
+                    <tr><td>北信越設備工業株式会社</td><td class="small muted">https://www.hokushinetsu-setsubi.example.jp</td><td class="small muted">建設・設備/設備工事・設備設計</td><td><span class="muted">—</span></td><td>小林</td><td>076-233-4180</td></tr>
                   </tbody></table>
                   <p class="small muted" style="margin:10px 0 0">列の対応先や重複時の扱いを変えたいときは、下の「詳細設定」を開いてください。問題なければ「投入実行」へ進めます。</p>
                 </div>
@@ -534,12 +550,12 @@
                 <div class="panel cue in" data-in="5.2"><h2><span class="panel-step">3</span>既定担当・リード元</h2><div class="grid2"><div class="field"><label>既定の自社担当（salesEmail）</label><div class="inp"><span class="ph">空欄の場合は実行ユーザーが担当になります</span></div></div><div class="field"><label>リード元（leadSource）</label><div class="inp">リスト取込</div></div></div></div>
                 <div class="panel cue in" data-in="5.2" data-fx="11:16:Dry-Run → 確定して投入"><h2><span class="panel-step">4</span>投入実行</h2>
                   <div class="row"><span class="btn secondary" data-click="9.6">Dry-Run</span><span class="btn success" data-click="12.4">確定して投入</span><span class="small muted">Dry-Run は書き込まずに件数だけ確認します。</span></div>
-                  <div class="cue" data-in="13.2" style="margin-top:12px"><div class="row"><span class="pill done">新規 3</span><span class="pill error">既存に統合 0</span><span class="pill pending">社名のみ一致 0</span><span class="pill skip">取込不可 0</span><span class="pill in_progress">登録 3</span><span class="pill in_progress">更新 0</span><span class="pill skip">スキップ 0</span></div><div class="small muted" style="margin-top:6px">投入結果 ／ 合計 3 行</div><div class="small" style="margin-top:8px">取り込んだ 3 社は工程5（テレアポ）の対象になりました。 <span class="empty-hint-link">③ テレアポへ →</span></div></div>
+                  <div class="cue" data-in="13.2" style="margin-top:12px"><div class="row"><span class="pill done">新規 341</span><span class="pill error">既存に統合 24</span><span class="pill pending">社名のみ一致 8</span><span class="pill skip">取込不可 5</span><span class="pill in_progress">登録 341</span><span class="pill in_progress">更新 24</span><span class="pill skip">スキップ 13</span></div><div class="small muted" style="margin-top:6px">投入結果 ／ 合計 378 行</div><div class="small" style="margin-top:8px">取り込んだ 341 社は工程5（テレアポ）の対象になりました。 <span class="empty-hint-link">③ テレアポへ →</span></div></div>
                 </div>
               </div></div>
-              <div class="toast cue" data-in="4.8" data-out="8.8"><div class="banner ok">✅ プレビューを生成しました（3行 / 取込先が決まった列 100%）</div></div>
-              <div class="toast cue" data-in="10.2" data-out="12.2"><div class="banner ok">✅ Dry-Run 完了（書き込みはしていません）：新規 3 / 既存に統合 0</div></div>
-              <div class="toast cue" data-in="13.0" data-out="16"><div class="banner ok">✅ 投入完了：新規 3 / 更新 0 件</div></div>
+              <div class="toast cue" data-in="4.8" data-out="8.8"><div class="banner ok">✅ プレビューを生成しました（378行 / 取込先が決まった列 100%）</div></div>
+              <div class="toast cue" data-in="10.2" data-out="12.2"><div class="banner ok">✅ Dry-Run 完了（書き込みはしていません）：新規 341 / 既存に統合 24</div></div>
+              <div class="toast cue" data-in="13.0" data-out="16"><div class="banner ok">✅ 投入完了：新規 341 / 更新 24 件</div></div>
             </section>
 
             <!-- ===== 3. メール送信 /outreach?tab=dm ===== -->
@@ -563,13 +579,18 @@
                   <div class="row" style="gap:16px;margin-top:6px"><div class="field" style="width:200px;margin:0"><label>メールアドレス</label><div class="sel">すべて</div></div><div class="field" style="width:220px;margin:0"><label>事前調査（パーソナライズの材料）</label><div class="sel">すべて</div></div><div class="field" style="width:200px;margin:0"><label>架電禁止(DNC)の企業</label><div class="sel">一覧に出さない（既定）</div></div></div>
                 </div>
                 <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start">
-                  <div class="panel" data-fx="2.5:7.5:作ったリストから12社"><h2>対象企業（DM可 12 社）</h2>
-                    <table class="tbl"><thead><tr><th style="width:32px"><span class="chk cue in" data-in="2.0"></span></th><th>会社名</th><th>担当者</th><th>メール</th><th>所在地</th><th>カテゴリ</th><th>材料</th><th>DMステータス</th></tr></thead><tbody>
-                      <tr class="cue sel" data-in="2.2"><td><span class="chk on"></span></td><td>ロジテック物流株式会社</td><td>高橋 誠</td><td class="mono">takahashi@logitech-buturyu.example.jp</td><td>神奈川県</td><td>運輸・交通・物流・倉庫</td><td><span class="pill in_progress">B</span> <span class="small muted">事実あり</span></td><td><span class="pill pending">未着手</span></td></tr>
-                      <tr class="cue sel" data-in="2.4"><td><span class="chk on"></span></td><td>東和デリバリー株式会社</td><td><span class="muted">—</span></td><td class="mono">info@towa-dlv.example.jp</td><td>東京都</td><td>運輸・交通・物流・倉庫</td><td><span class="pill done">A</span> <span class="small muted">観測あり</span></td><td><span class="pill pending">未着手</span></td></tr>
-                      <tr class="cue sel" data-in="2.6"><td><span class="chk on"></span></td><td>ベイサイド倉庫サービス株式会社</td><td>小林 部長</td><td class="mono">recruit@bayside-wh.example.jp</td><td>千葉県</td><td>運輸・交通・物流・倉庫</td><td><span class="pill in_progress">B</span> <span class="small muted">事実あり</span></td><td><span class="pill pending">未着手</span></td></tr>
-                      <tr><td><span class="chk"></span></td><td>丸高運送株式会社</td><td><span class="muted">—</span></td><td style="color:var(--danger)">未設定</td><td>埼玉県</td><td>運輸・交通・物流・倉庫</td><td><span class="pill error">C</span> <span class="small muted">一般論のみ</span></td><td><span class="pill pending">未着手</span></td></tr>
-                    </tbody></table></div>
+                  <div class="panel" data-fx="2.5:7.5:作ったリストから12社"><h2>対象企業（DM可 38 社）</h2>
+                    <div class="tbl-scroll"><table class="tbl"><thead><tr><th style="width:32px"><span class="chk cue in" data-in="2.0"></span></th><th>会社名</th><th>担当者</th><th>メール</th><th>所在地</th><th>カテゴリ</th><th>材料</th><th>DMステータス</th></tr></thead><tbody>
+                      <tr class="cue sel" data-in="2.2"><td><span class="chk on"></span></td><td>ロジテック物流株式会社</td><td>高橋 誠</td><td>takahashi@logitech-buturyu.example.jp</td><td class="small muted">神奈川県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill in_progress">B</span> <span class="small muted">事実あり</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue sel" data-in="2.4"><td><span class="chk on"></span></td><td>東和デリバリー株式会社</td><td><span class="muted">—</span></td><td>info@towa-dlv.example.jp</td><td class="small muted">東京都</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill done">A</span> <span class="small muted">観測あり</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue sel" data-in="2.6"><td><span class="chk on"></span></td><td>ベイサイド倉庫サービス株式会社</td><td>小林 部長</td><td>recruit@bayside-wh.example.jp</td><td class="small muted">千葉県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill in_progress">B</span> <span class="small muted">事実あり</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue sel" data-in="2.8"><td><span class="chk on"></span></td><td>第一梱包運輸株式会社</td><td>森 健一</td><td>mori@daiichi-konpou.example.jp</td><td class="small muted">埼玉県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill done">A</span> <span class="small muted">観測あり</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue sel" data-in="3.0"><td><span class="chk on"></span></td><td>港南ロジスティクス株式会社</td><td><span class="muted">—</span></td><td>saiyo@konan-logi.example.jp</td><td class="small muted">東京都</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill in_progress">B</span> <span class="small muted">事実あり</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue sel" data-in="3.2"><td><span class="chk on"></span></td><td>みなと急配株式会社</td><td>岡田 主任</td><td>okada@minato-kyuhai.example.jp</td><td class="small muted">神奈川県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill in_progress">B</span> <span class="small muted">事実あり</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue" data-in="3.4"><td><span class="chk"></span></td><td>丸高運送株式会社</td><td><span class="muted">—</span></td><td style="color:var(--danger)">未設定</td><td class="small muted">埼玉県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill error">C</span> <span class="small muted">一般論のみ</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue" data-in="3.6"><td><span class="chk"></span></td><td>セントラル運送株式会社</td><td><span class="muted">—</span></td><td>info@central-unso.example.jp</td><td class="small muted">千葉県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill error">C</span> <span class="small muted">一般論のみ</span></td><td><span class="pill pending">未着手</span></td></tr>
+                      <tr class="cue" data-in="3.8"><td><span class="chk"></span></td><td>青葉台配送センター株式会社</td><td><span class="muted">—</span></td><td>soumu@aobadai-hs.example.jp</td><td class="small muted">神奈川県</td><td class="small muted">運輸・交通・物流・倉庫</td><td><span class="pill error">C</span> <span class="small muted">一般論のみ</span></td><td><span class="pill pending">未着手</span></td></tr>
+                    </tbody></table></div></div>
                   <div class="panel"><h2>一斉DM</h2>
                     <div class="field"><label>テンプレート</label><div class="sel"><span class="type" data-type="T03-dm" data-in="4.0" data-dur=".4"></span></div></div>
                     <div class="field"><label>文面のパーソナライズ</label><div class="small"><span class="chk on"></span>1社ずつ、その企業の情報をもとに文面を変える</div><div class="small"><span class="chk cue in" data-click="5.2" data-out="5.4"></span><span class="chk on show" data-in="5.4"></span>AIに書かせる（先頭30社まで／残りは自動生成文）</div><div class="small muted">差し込む位置はテンプレ本文に {個別提案} と書くと指定できます（無い場合は署名の手前に入ります）。</div><div class="small muted">選択中の材料: A 4社 / B 8社 / C 0社（既定では 12 社へ送ります）</div></div>
@@ -1135,91 +1156,74 @@
 
   // ---- 字幕＝ナレーション台本 ----
   // [開始秒, 終了秒, 読み上げ＆字幕テキスト]
-  // 1キューにつき言うことは1つだけ。読み上げ速度は窓の長さから自動で決めるので、
-  // 直すときは「窓を伸ばす」か「文を短くする」かのどちらかにする。
+  // 1キューにつき言うことは1つだけ。**全キューを等倍で読む**ので、窓に収まる長さで書く。
+  // 収まっているかは実測モデル「秒 = 0.1721 × モーラ + 0.552」で確かめる（下の speakSec）。
+  // 予測秒 ÷ 窓 が 0.93 を超えたら、窓を伸ばすか文を短くする。速度で吸収してはいけない
+  // ——速めると抑揚が崩れ、それでも溢れると次のキューの cancel で文が途中で切れる。
   const CAPS = [
-    [1.0,   5.2, '営業ひとりの、一日を追います。'],
-    [5.2,  10.0, '朝9時から、夕方18時まで。'],
-    [10.0, 14.0, '触る画面は、18工程ぶん。'],
+    [  1.0,   5.2, '営業の一日を、追います。'],
+    [  5.2,  10.0, '朝9時から、18時まで。'],
+    [ 10.0,  14.0, '画面は、18工程ぶん。'],
 
-    [14.6, 20.0, '9時。まず、今日どこに電話するかを決めます。'],
-    [20.0, 26.0, 'ICP適合と、インテント。2つの軸で絞ります。'],
-    [26.0, 33.0, '条件に合うのは63社。上位40社を、窓が開いている順に。'],
-    [33.0, 39.0, '名前を付けて保存すると、その40社が固定されます。'],
-    [39.0, 46.0, '1社ごとに、なぜ今かと、開口一番の一文が付きます。'],
+    [ 14.6,  20.0, '9時。今日の電話先を決めます。'],
+    [ 20.0,  26.0, '軸は2つ。ICP適合と、インテント。'],
+    [ 26.0,  33.0, '該当63社。窓の開いた順に、上位40社。'],
+    [ 33.0,  39.0, '保存すると、その40社が固定されます。'],
+    [ 39.0,  46.0, '1社ごとに、なぜ今かと、最初の一言が付きます。'],
 
-    [46.6, 51.5, '9時40分。手元のCSVは、貼るだけ。'],
-    [51.5, 57.0, '列の対応は、自動で推定します。'],
-    [57.0, 62.0, '取り込んだ3社は、そのままテレアポの対象へ。'],
+    [ 46.6,  51.5, '9時40分。CSVを貼るだけ。'],
+    [ 51.5,  57.0, '列の対応は、自動で推定します。'],
+    [ 57.0,  62.0, '341社が、そのままテレアポへ。'],
 
-    [63.0, 69.0, '10時。まず、メールで接点をつくります。'],
-    [69.0, 76.0, '作ったリストから12社。1社ずつ、AIが書き分けます。'],
-    [76.0, 82.0, '送信は、あなたのGmailから。'],
-    [82.0, 86.0, '1日の上限は、50通です。'],
+    [ 63.0,  69.0, '10時。まず、メールで接点をつくります。'],
+    [ 69.0,  76.0, 'リストから12社。1社ずつ、AIが書き分けます。'],
+    [ 76.0,  82.0, '送信は、あなたのGmailから。'],
+    [ 82.0,  86.0, '上限は1日50通。'],
 
-    [86.6, 92.5, '10時30分。今日のコール一覧です。'],
-    [92.5, 95.5, '並びは、ICP適合スコア順。'],
-    [95.5, 98.5, '企業を選ぶと、架電コックピットに変わります。'],
-    [98.5,101.0, '左が、企業と事前調査。'],
-    [101.0,103.3,'中央が、台本。'],
-    [103.3,106.0,'右が、架電メモ。'],
-    [106.0,111.0,'発信はワンクリック。終話は自動で検知します。'],
-    [111.0,118.0,'予算の時期、採用ニーズ。話しながら押していきます。'],
-    [118.0,126.0,'通話中に打つのは、架電メモだけでいい。'],
-    [126.0,133.0,'録音と文字起こしは、Zoomから自動で溜まります。'],
-    [132.5,136.0,'架電結果から、アポ獲得。'],
-    [136.0,144.0,'ヒアリングは、メモと文字起こしから自動で埋まります。'],
-    [144.0,150.0,'日程は先方が持ち帰り。あとで調整、にチェック。'],
-    [150.0,154.0,'確定すると、日程調整へ進みます。'],
-    [154.0,160.0,'成績の良い台本は、全体に共有されます。'],
+    [ 86.6,  92.5, '10時30分。今日のコール一覧。'],
+    [ 92.5,  95.5, '並びはスコア順。'],
+    [ 95.5,  98.5, '押すと架電画面。'],
+    [ 98.5, 105.0, '左が企業情報、中央が台本、右が架電メモ。'],
+    [105.0, 111.0, '発信はワンクリック。終話も自動です。'],
+    [111.0, 118.0, '予算の時期、採用ニーズ。話しながら押していきます。'],
+    [118.0, 126.0, '通話中に打つのは、架電メモだけでいい。'],
+    [126.0, 132.5, '録音と文字起こしは、Zoomから自動で溜まります。'],
+    [132.5, 136.0, '結果はアポ獲得。'],
+    [136.0, 144.0, 'ヒアリングは、メモと文字起こしから自動で埋まります。'],
+    [144.0, 150.0, '日程は持ち帰り。あとで調整、にチェック。'],
+    [150.0, 154.0, '確定すると、日程調整へ。'],
+    [154.0, 160.0, '成績の良い台本は、全体に共有されます。'],
 
-    [160.6,165.5,'12時。持ち帰った日程を押さえます。'],
-    [165.5,170.0,'カレンダーの空きから、候補を4つ。'],
-    [170.0,172.5,'調整URL入りのメールを送信。'],
-    [172.5,178.0,'お客様はスマホで選ぶだけ。ログインは不要です。'],
-    [178.0,184.0,'確定すると、担当に通知が飛びます。'],
+    [160.6, 165.5, '12時。日程を押さえます。'],
+    [165.5, 170.0, 'カレンダーから、候補を4つ。'],
+    [170.0, 178.0, '調整URL入りのメールを送信。お客様はスマホで選ぶだけ。'],
+    [178.0, 184.0, 'ログイン不要。確定すると担当に通知。'],
 
-    [184.6,187.0,'13時。午後の商談の準備です。'],
-    [187.0,192.0,'ヒアリングの議事録を貼ると、材料になります。'],
-    [192.0,196.0,'課題の仮説を、AIが3つ。'],
-    [196.0,199.5,'根拠は架電メモと企業調査です。'],
-    [200.5,204.0,'媒体プランは、推奨から選びます。'],
-    [204.0,208.0,'提案書は12枚。Googleスライドに生成されます。'],
+    [184.6, 192.0, '13時。ヒアリング議事録を貼ると、材料になります。'],
+    [192.0, 196.6, '課題の仮説を、AIが3つ。'],
+    [196.6, 200.5, '根拠は架電メモと調査です。'],
+    [200.5, 208.0, '媒体プランは推奨から。提案書は12枚のスライドに。'],
 
-    [208.6,210.6,'14時。商談の時間です。'],
-    [210.6,217.0,'口頭で伝えてから、録音を開始。文字起こしがその場で流れます。'],
-    [219.0,224.0,'終わると、議事録に整理されます。'],
-    [224.5,228.0,'課題、懸念、決定事項、宿題。'],
-    [228.0,232.0,'一行ごとに、発言の根拠が付きます。'],
-    [232.0,240.0,'お礼メールは、議事録から下書きされます。'],
+    [208.6, 217.0, '14時。口頭で伝えてから、録音を開始します。'],
+    [219.0, 224.0, '文字起こしが、その場で流れます。'],
+    [224.5, 228.0, '終わると、議事録に。'],
+    [228.0, 232.0, '一行ごとに根拠が付きます。'],
+    [232.0, 240.0, '課題、懸念、決定事項、宿題。お礼メールも下書きに。'],
 
-    [240.6,245.0,'15時30分。2回目の提案に移ります。'],
-    [245.0,249.8,'型は議事録から。主題は、懸念への回答です。'],
+    [240.6, 249.8, '15時30分。2回目の提案は、懸念への回答が主題です。'],
+    [250.5, 259.0, '見積は企業とプランを選んで発行。番号は日付と連番です。'],
+    [259.4, 266.0, '申込書の発行が、受注の確定です。'],
 
-    [250.5,253.5,'見積は、企業とプランを選んで発行。'],
-    [253.6,255.6,'内容を確認してから、発行します。'],
-    [256.0,259.0,'番号は、日付と連番で振られます。'],
+    [266.6, 274.3, '17時。掲載を登録。入稿待ちから掲載中へ。'],
+    [274.4, 282.0, '請求は掲載と一対一。月末に自動で集まります。'],
+    [282.0, 290.0, '入金で工程18が完了。月次レポートはボタンひとつ。'],
+    [290.0, 294.0, '受注と入金の推移。'],
 
-    [259.4,262.0,'申込書を発行します。'],
-    [262.0,266.0,'この発行が、受注の確定です。'],
+    [294.6, 300.3, '18時。企業の台帳を開きます。'],
+    [302.0, 310.0, '今日の架電も、この時系列に。すべてが、ひとつの台帳に。'],
 
-    [266.6,269.2,'17時。事務をまとめて片づけます。'],
-    [269.2,274.0,'掲載を登録。入稿待ちから、掲載中へ。'],
-
-    [274.4,276.4,'請求は、掲載と一対一。'],
-    [276.5,282.0,'月末に対象が自動で集まります。確認して、発行するだけ。'],
-    [282.0,286.0,'入金を確認したら、工程18が完了。'],
-
-    [286.4,290.0,'月次レポートは、ボタンひとつで1行に。'],
-    [290.0,294.0,'受注・請求・入金の推移が並びます。'],
-
-    [294.6,298.5,'18時。一日の終わりに、企業の台帳を開きます。'],
-    [298.5,300.3,'18工程が、どこまで来たか。'],
-    [302.0,307.0,'今日の架電も、この時系列に並びます。'],
-    [307.0,310.0,'架電も商談も請求も、ひとつの台帳に。'],
-
-    [310.6,315.5,'人が集中するのは、話す工程だけ。'],
-    [315.5,320.0,'あとは、ASUMOが回し続けます。'],
+    [310.6, 315.5, '人が集中するのは、話す工程だけ。'],
+    [315.5, 320.0, 'あとは、ASUMOが回し続けます。'],
   ];
 
   // ---- 索引・目盛 ----
@@ -1374,8 +1378,10 @@
     if(txt!==lastCap){ if(txt) cap.textContent=txt; subs.classList.toggle('hide', !txt); lastCap=txt; }
     if(ci!==lastCapIdx){
       lastCapIdx=ci;
-      // 頭から入ったキューだけ読み上げる（シークで途中に落ちたときは黙って字幕だけ）
-      if(playing && ci>=0 && ci!==spokenIdx && t-CAPS[ci][0] < 0.8) speakCue(ci);
+      // 頭から入ったキューだけ読み上げる（シークで途中に落ちたときは黙って字幕だけ）。
+      // 窓の4割までは「頭から入った」と見なす——固定 0.8 秒だと、描画が一瞬詰まった
+      // フレームで判定に間に合わず、字幕だけ出て一文まるごと無音になることがあった。
+      if(playing && ci>=0 && ci!==spokenIdx && t-CAPS[ci][0] < (CAPS[ci][1]-CAPS[ci][0]) * 0.4) speakCue(ci);
       if(ci>=0) spokenIdx=ci;
     }
 
@@ -1461,10 +1467,17 @@
     try{ const u = new SpeechSynthesisUtterance('ナレーションは、この声で流れます。'); u.voice = voice; u.lang = voice.lang || 'ja-JP'; synth.speak(u); }catch(_){}
   });
 
-  // 等倍での読み上げ速度＝「文の長さ ÷ 字幕の表示時間」。再生倍率はこれに素直に掛ける。
-  // （窓から毎回割り戻すと下限 0.85 に張り付いて、1.5× でも音声が 1.5 倍にならなかった）
+  /* 読み上げ時間の見積り。Windows の Microsoft Ayumi で全キューを等倍実測して出した係数。
+     1秒あたり 5.81 モーラ、発話ごとの立ち上がりが 0.55 秒。
+     以前は 8.6×0.94＝8.08 モーラ/秒＝実際より 1.39 倍速く喋る前提で見積もっており、
+     窓に収まらない文を rate 0.85〜1.55 で押し込もうとしていた。上限に張り付いた文は
+     それでも溢れ、次のキューの cancel で途中から切られる——これが「字幕と音声が違う」
+     「流ちょうじゃない」の正体だった。台本を窓に収まる長さへ直したので、既定は等倍。 */
+  const MORA_SEC = 0.1721, SPEAK_LEAD = 0.552;
+  const speakSec = c => MORA_SEC * moras(c[2]) + SPEAK_LEAD;
   const RATE_CAP = 2.6;
-  function baseRate(c){ return Math.max(0.85, Math.min(1.55, moras(c[2]) / (8.6 * (c[1]-c[0]) * 0.94))); }
+  // 全キューを同じ速度で読む＝抑揚が揃う。収まらない文があるときだけ、その文だけ速める。
+  function baseRate(c){ return Math.max(1, Math.min(1.3, speakSec(c) / ((c[1]-c[0]) * 0.95))); }
   function rateFor(c){ return Math.min(RATE_CAP, baseRate(c) * speed); }
 
   // 文のどこまで読んだか。boundary が取れる音声はそれを、取れなければ経過時間から見積もる。
@@ -1507,7 +1520,7 @@
   function repaceSpeech(){
     if(!synth || !audioOn || !cur) return;
     const st = cur;
-    const raw = st.at != null ? st.at : charAtMoras(st.text, (performance.now() - st.t0) / 1000 * 8.6 * st.rate);
+    const raw = st.at != null ? st.at : charAtMoras(st.text, Math.max(0, (performance.now() - st.t0) / 1000 - SPEAK_LEAD) * st.rate / MORA_SEC);
     const rest = st.text.slice(snapBack(st.text, raw));
     if(!rest || rest.length < st.text.length * 0.25) return;  // 言い終わりかけなら触らない
     speakText(st.i, rest);
