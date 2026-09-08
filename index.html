@@ -896,7 +896,7 @@
             </section>
 
             <!-- ===== 5. 日程調整 /outreach?tab=schedule → /picker ===== -->
-            <section class="scene" data-start="102" data-end="113" data-nav="/outreach" data-step="5" data-scroll="0:0,0.5:0,1.4:330,2.5:330,3.2:1040,4.6:1040,5:1405,5.5:1405">
+            <section class="scene" data-start="102" data-end="113" data-nav="/outreach" data-step="4" data-scroll="0:0,0.5:0,1.4:330,2.5:330,3.2:1040,4.6:1040,5:1405,5.5:1405">
               <div class="page"><div class="container">
                 <div class="page-head"><h1>📧 メール送信</h1><div class="meta">asumo があなたのGmailから送るメールはすべてここから。新規接触の一斉DMと、日程が決まらなかったアポの調整・リスケ。届いた返信も同じ画面で把握します。</div>
                   <div class="flow-strip"><span class="flow-pos">営業工程 <b>3</b><span class="flow-tot"> / 8</span></span><span class="flow-links"><span class="flow-link">← 前: リスト取込</span><span class="flow-link next">次: フォーム送信 →</span></span></div></div>
@@ -939,7 +939,7 @@
               </div>
             </section>
             <!-- ===== 6. 初回商談資料作成 /proposal ===== -->
-            <section class="scene" data-start="113" data-end="130" data-nav="/proposal" data-step="6" data-scroll="0:0,1.4:0,2.5:382,5.7:382,6.7:865,11:865,11.7:1306,14.2:1306,14.9:1470,17:1470">
+            <section class="scene" data-start="113" data-end="130" data-nav="/proposal" data-step="5" data-scroll="0:0,1.4:0,2.5:382,5.7:382,6.7:865,11:865,11.7:1306,14.2:1306,14.9:1470,17:1470">
               <div class="page"><div class="container">
                 <div class="page-head"><h1>初回商談資料作成</h1><div class="meta">課題仮説をAI生成し、媒体プランから提案書を生成</div>
                   <div class="flow-strip"><span class="flow-pos">営業工程 <b>6</b><span class="flow-tot"> / 8</span></span><span class="flow-links"><span class="flow-link">← 前: テレアポ</span><span class="flow-link next">次: 議事録 →</span></span></div></div>
@@ -1249,7 +1249,7 @@
 
   // ---- 18工程リボン（演出用。番号と名称は docs/営業プロセス全体像 の18工程どおり） ----
   // 新構成の11工程（台本 v3）。本体の営業工程18とは別で、この動画が語る単位。
-  const STEPS = ['リスト作成','メール送信','フォーム送信','テレアポ','日程調整','商談','2回目商談資料','見積','申込','掲載','請求'];
+  const STEPS = ['リスト作成','メール送信','フォーム送信','テレアポ','初回商談資料作成','商談','2回目商談資料作成','見積','申込','掲載','請求'];
   const ribbon = $('#ribbon');
   ribbon.innerHTML = STEPS.map((s,i)=>`<span class="step" data-i="${i+1}"><i>${i+1}</i>${s}</span>`).join('');
 
@@ -1316,8 +1316,8 @@
     [ 41, '工程2', 'メール送信', ''],
     [ 54, '工程3', 'フォーム送信', ''],
     [ 62, '工程4', 'テレアポ', ''],
-    [102, '工程5', '日程調整', ''],
-    [113, '工程6・7', '商談 → 2回目商談資料', ''],
+    [102, '工程4', '日程調整', ''],
+    [113, '工程5〜7', '初回商談資料 → 商談 → 2回目', ''],
     [147, '工程8・9', '見積・申込・契約', ''],
     [165, '工程10', '掲載', ''],
     [178, '工程11', '請求・入金', ''],
